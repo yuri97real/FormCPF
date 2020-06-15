@@ -5,7 +5,7 @@ function mascaraCpf(mascara, input) {
     const tecla = (window.event) ? event.keyCode : event.which
 
     for(let i=0; i<numCpf.length; i++) {
-        vetMask.splice(vetMask.indexOf("#"), 1, numCpf[i])
+        vetMask.splice(vetMask.indexOf("_"), 1, numCpf[i])
     }
 
     input.value = vetMask.join("")
