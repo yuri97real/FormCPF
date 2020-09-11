@@ -1,5 +1,7 @@
-# FormCPF
- Máscara de CPF em Javascript Puro
+# Form Mask CPF
 
- Desenvolvi esse código como alternativa ao mask JQuery em relação à CPF. Ele é simples, leve e totalmente funcional!
- Você pode ver o desenvolvimento linha a linha do código nesse vídeo https://youtu.be/28x5J_PFRX0
+Máscara para Input em Javascript Puro
+
+Com esse script, você deve ser capaz de usar modelos de máscaras simples, como CPF, RG, CNPJ, TELEFONE E ETC
+Nesse vídeo https://youtu.be/28x5J_PFRX0 está o desenvolvimento linha a linha desse código.
+Regularmente, estou modificando algumas coisas, então pode ser que o conteúdo do vídeo esteja um pouco diferente.
