@@ -4,11 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CPF</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body onload="document.querySelector('#cpf').focus()">
-    <input type="tel" id="cpf" value="___.___.___-__" autocomplete="off">
+
+    <input type="tel" id="cpf" placeholder="CPF" autocomplete="off">
+    <input type="tel" id="tel" placeholder="TELEFONE" autocomplete="off">
     <!--input type="tel" para abrir o teclado numérico do celular no chrome-->
     <script src="formMask_V2.js"></script>
-    <!--<script src="formMask.js"></script>-->
+    <!--importar script da máscara-->
+    <script>
+        new FormMask(document.querySelector("#cpf"), "___.___.___-__", "_", [".", "-"])
+        new FormMask(document.querySelector("#tel"), "(__)_____-____", "_", ["(", ")", "-"])
+    </script>
+    <!--
+        para iniciar, informe o elemento, a máscara, o caracter de substituição e
+        os caracteres a serem ignorados
+    -->
+
 </body>
 </html>

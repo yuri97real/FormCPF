@@ -1,131 +1,193 @@
-const input = document.querySelector("#cpf")
-const mask = "___.___.___-__"
-const char = "_"
-const specialChars = [".", "-"]
+class FormMask {
 
-input.addEventListener("focus", () => { //empty case, add mask and go to the beginning
-    if(input.value == "" || input.value == mask) {
-        input.value = mask
-        input.setSelectionRange(0, 0) //cursor position
-    }
-})
-
-input.addEventListener("keydown", e => {
-
-    const backspace = (e.key == "Backspace" || e.key == "Delete")
-
-    if(backspace) {
-        const arrayCpf = input.value.split("")
+    constructor(element, mask, replacementChar, charsToIgnore) {
         
-        deleteValue(arrayCpf)
-        e.preventDefault()
-    }
-})
+        this.input = element
+        this.mask = mask
+        this.char = replacementChar
+        this.specialChars = charsToIgnore
 
-input.addEventListener("keypress", e => {
+        this.input.value = this.mask
 
-    const numberKey = (!isNaN(e.key) && e.keyCode != 32) //keyCode == 32 == space key == number... yes, " " == 0
+        this.applyListeners()
 
-    if(numberKey) {
-        const arrayCpf = input.value.split("")
-        maskPattern(arrayCpf, e)
     }
 
-    e.preventDefault()
-})
+    applyListeners() {
 
-input.addEventListener("paste", e => {
+        this.input.addEventListener("focus", () => this.moveCursorToStart()) //empty case, add mask and go to the beginning
+        this.input.addEventListener("click", () => this.moveCursorToStart())
 
-    const data = e.clipboardData.getData("text")
+        this.input.addEventListener("blur", e => {
 
-    onPasteCpf(data)
+            const inputChars = this.input.value.split("")
+            const ignore = inputChars.indexOf(this.char) < 0
 
-    e.preventDefault()
-})
+            const className = ignore ? "valid" : "invalid"
 
-function maskPattern(arrayCpf, event) {
+            this.cleanAndSetClasses(this.input, [className])
 
-    let cursor = input.selectionStart
+            if(this.input.value == this.mask) this.input.value = ""
+
+        })
     
-    for(let i=cursor; i<arrayCpf.length; i++) { //skip special chars on insert
-        if(specialChars.indexOf(arrayCpf[i]) >= 0) {
-            cursor++
-        } else break
+        this.input.addEventListener("keydown", e => {
+    
+            if(e.key == "Backspace" || e.key == "Delete") {
+                
+                this.deleteValue( this.input.value.split("") )
+                e.preventDefault()
+
+            }
+
+        })
+    
+        this.input.addEventListener("keypress", e => {
+
+            e.preventDefault()
+    
+            const numberKey = (!isNaN(e.key) && e.key != " ") //(" " == 0) to javascript
+    
+            if(!numberKey) return
+
+            const inputChars = this.input.value.split("")
+
+            this.maskPattern(inputChars, e)
+
+        })
+    
+        this.input.addEventListener("paste", e => {
+    
+            const data = e.clipboardData.getData("text")
+    
+            this.onPasteData(data)
+
+            e.preventDefault()
+
+        })
+
     }
-    
-    arrayCpf.splice(cursor, 1, event.key)
-    
-    insertValue(arrayCpf.join(""), cursor+1)
-}
 
-function insertValue(result, cursor) {
-    if(result.length == mask.length) {
-        input.value = result
-        if(cursor >= 0) {
-            input.setSelectionRange(cursor, cursor)
+    moveCursorToStart() {
+
+        this.cleanAndSetClasses(this.input, [])
+
+        if(this.input.value == "" || this.input.value == this.mask) {
+
+            const inputChars = this.input.value.split("")
+            const indexToStart = inputChars.indexOf(this.char)
+
+            this.input.value = this.mask
+            this.input.setSelectionRange(indexToStart, indexToStart) //cursor position
+
         }
+
     }
-}
 
-function deleteValue(arrayCpf) {
+    cleanAndSetClasses(element, classes) {
 
-    const withoutSelectionRange = checkSelectionRange(arrayCpf) //true case, remove element by element... otherwise remove elements in the selection range
+        element.classList.remove("valid", "invalid")
+        classes.forEach(className => element.classList.add(className))
 
-    if(withoutSelectionRange) {
+    }
 
-        let cursor = input.selectionStart
+    maskPattern(inputChars, event) {
 
-        for(let i=0; i<arrayCpf.length; i++) { //skip special chars on delete
-            if(specialChars.indexOf(arrayCpf[cursor-1]) >= 0) {
-                cursor -= 1
-            }else break
+        let cursor = this.input.selectionStart
+        
+        for(let i=cursor; i<inputChars.length; i++) { //grant to skip all special chars on insert
+
+            let ignore = this.specialChars.indexOf(inputChars[i]) >= 0 //if special char, ignore (increment cursor)
+
+            if(!ignore) break
+            
+            cursor++ //jump to next char != ignored
+
+        }
+        
+        inputChars.splice(cursor, 1, event.key)
+        
+        this.insertValue(inputChars.join(""), cursor+1)
+
+    }
+
+    insertValue(result, cursor) {
+
+        if(result.length != this.mask.length) return
+
+        this.input.value = result
+
+        if(cursor >= 0) this.input.setSelectionRange(cursor, cursor)
+
+    }
+
+    deleteValue(inputChars) {
+
+        const withoutSelectionRange = this.checkSelectionRange(inputChars)
+
+        if(!withoutSelectionRange) return
+
+        let cursor = this.input.selectionStart
+
+        for(let i=0; i<inputChars.length; i++) { //skip special chars on delete
+
+            let ignore = this.specialChars.indexOf(inputChars[cursor-1]) >= 0
+
+            if(!ignore) break
+            
+            cursor -= 1
+
         }
 
-        arrayCpf.splice(cursor-1, 1, char)
-        insertValue(arrayCpf.join(""), cursor-1)
+        inputChars.splice(cursor-1, 1, this.char)
+
+        this.insertValue(inputChars.join(""), cursor-1)
+
     }
-}
 
-function checkSelectionRange(arrayCpf) {
+    checkSelectionRange(inputChars) {
 
-    if(input.selectionStart != input.selectionEnd) {
+        if(this.input.selectionStart == this.input.selectionEnd) return true
 
-        let start = input.selectionStart
-        let end = input.selectionEnd
+        let start = this.input.selectionStart
+        let end = this.input.selectionEnd
 
         for(let i=start; i<end; i++) {
 
-            let nonSpecialChar = specialChars.indexOf(arrayCpf[i]) < 0
+            let nonSpecialChar = this.specialChars.indexOf(inputChars[i]) < 0
             
-            if(nonSpecialChar) {
-                arrayCpf.splice(i, 1, char)
-            }
+            if(nonSpecialChar) inputChars.splice(i, 1, this.char)
+
         }
 
-        insertValue(arrayCpf.join(""), start)
+        this.insertValue(inputChars.join(""), start)
 
         return false
+
     }
 
-    return true
-}
+    onPasteData(data) {
+        
+        const maskChars = this.mask.split("")
+        const dataChars = data.split("")
 
-function onPasteCpf(data) {
-    
-    const arrayCpf = mask.split("")
-    const arrayInput = data.split("")
-    const onlyNumbers = arrayInput.filter( value => !isNaN(value) && value != " " )
-    const maskWithoutSpecialChars = arrayCpf.filter( value => value == char )
-    const numberOfChars = maskWithoutSpecialChars.length
+        const onlyNumbers = dataChars.filter( value => !isNaN(value) && value != " " )
+        const maskWithoutSpecialChars = maskChars.filter( value => value == this.char )
 
-    for(let i=0; i<numberOfChars; i++) {
+        const numberOfChars = maskWithoutSpecialChars.length
 
-        let positionChar = arrayCpf.indexOf(char)
-        let number = onlyNumbers[i] || char
+        for(let i=0; i<numberOfChars; i++) {
 
-        arrayCpf.splice(positionChar, 1, number)
+            let positionChar = maskChars.indexOf(this.char)
+            let number = onlyNumbers[i] || this.char
+
+            maskChars.splice(positionChar, 1, number)
+        }
+
+        this.input.value = ""
+
+        this.insertValue(maskChars.join(""), maskChars.indexOf(this.char))
+
     }
 
-    input.value = ""
-    insertValue(arrayCpf.join(""), arrayCpf.indexOf(char))
 }
