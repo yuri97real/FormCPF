@@ -12,7 +12,7 @@ input.addEventListener("focus", () => { //empty case, add mask and go to the beg
 
 input.addEventListener("keydown", e => {
 
-    const backspace = (e.keyCode == 8)
+    const backspace = (e.key == "Backspace" || e.key == "Delete")
 
     if(backspace) {
         const arrayCpf = input.value.split("")
