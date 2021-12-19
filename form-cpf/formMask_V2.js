@@ -7,7 +7,7 @@ class FormMask {
         this.char = replacementChar
         this.specialChars = charsToIgnore
 
-        this.input.value = this.mask
+        //this.input.value = this.mask
 
         this.applyListeners()
 
@@ -74,10 +74,11 @@ class FormMask {
 
         if(this.input.value == "" || this.input.value == this.mask) {
 
+            this.input.value = this.mask
+
             const inputChars = this.input.value.split("")
             const indexToStart = inputChars.indexOf(this.char)
 
-            this.input.value = this.mask
             this.input.setSelectionRange(indexToStart, indexToStart) //cursor position
 
         }
