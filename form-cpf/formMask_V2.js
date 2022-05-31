@@ -1,13 +1,14 @@
 class FormMask {
 
     constructor(element, mask, replacementChar, charsToIgnore) {
+
+        element.type = "tel"
+        element.FormMask = this
         
         this.input = element
         this.mask = mask
         this.char = replacementChar
         this.specialChars = charsToIgnore
-
-        //this.input.value = this.mask
 
         this.applyListeners()
 
@@ -42,17 +43,18 @@ class FormMask {
 
         })
     
-        this.input.addEventListener("keypress", e => {
+        this.input.addEventListener("beforeinput", e => {
 
             e.preventDefault()
     
-            const numberKey = (!isNaN(e.key) && e.key != " ") //(" " == 0) to javascript
-    
+            const key = e.key || e.data
+            const numberKey = (!isNaN(key) && key != " ") //(" " == 0) to javascript
+
             if(!numberKey) return
 
             const inputChars = this.input.value.split("")
 
-            this.maskPattern(inputChars, e)
+            this.maskPattern(inputChars, key)
 
         })
     
@@ -92,7 +94,7 @@ class FormMask {
 
     }
 
-    maskPattern(inputChars, event) {
+    maskPattern(inputChars, key) {
 
         let cursor = this.input.selectionStart
         
@@ -106,7 +108,7 @@ class FormMask {
 
         }
         
-        inputChars.splice(cursor, 1, event.key)
+        inputChars.splice(cursor, 1, key)
         
         this.insertValue(inputChars.join(""), cursor+1)
 
